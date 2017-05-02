@@ -6,6 +6,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -36,13 +37,12 @@ func TestPullRequestsService_ListComments_allPulls(t *testing.T) {
 		Since:       time.Date(2002, time.February, 10, 15, 30, 0, 0, time.UTC),
 		ListOptions: ListOptions{Page: 2},
 	}
-	pulls, _, err := client.PullRequests.ListComments("o", "r", 0, opt)
-
+	pulls, _, err := client.PullRequests.ListComments(context.Background(), "o", "r", 0, opt)
 	if err != nil {
 		t.Errorf("PullRequests.ListComments returned error: %v", err)
 	}
 
-	want := []PullRequestComment{{ID: Int(1)}}
+	want := []*PullRequestComment{{ID: Int(1)}}
 	if !reflect.DeepEqual(pulls, want) {
 		t.Errorf("PullRequests.ListComments returned %+v, want %+v", pulls, want)
 	}
@@ -58,20 +58,19 @@ func TestPullRequestsService_ListComments_specificPull(t *testing.T) {
 		fmt.Fprint(w, `[{"id":1}]`)
 	})
 
-	pulls, _, err := client.PullRequests.ListComments("o", "r", 1, nil)
-
+	pulls, _, err := client.PullRequests.ListComments(context.Background(), "o", "r", 1, nil)
 	if err != nil {
 		t.Errorf("PullRequests.ListComments returned error: %v", err)
 	}
 
-	want := []PullRequestComment{{ID: Int(1)}}
+	want := []*PullRequestComment{{ID: Int(1)}}
 	if !reflect.DeepEqual(pulls, want) {
 		t.Errorf("PullRequests.ListComments returned %+v, want %+v", pulls, want)
 	}
 }
 
 func TestPullRequestsService_ListComments_invalidOwner(t *testing.T) {
-	_, _, err := client.PullRequests.ListComments("%", "r", 1, nil)
+	_, _, err := client.PullRequests.ListComments(context.Background(), "%", "r", 1, nil)
 	testURLParseError(t, err)
 }
 
@@ -85,8 +84,7 @@ func TestPullRequestsService_GetComment(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	comment, _, err := client.PullRequests.GetComment("o", "r", 1)
-
+	comment, _, err := client.PullRequests.GetComment(context.Background(), "o", "r", 1)
 	if err != nil {
 		t.Errorf("PullRequests.GetComment returned error: %v", err)
 	}
@@ -98,7 +96,7 @@ func TestPullRequestsService_GetComment(t *testing.T) {
 }
 
 func TestPullRequestsService_GetComment_invalidOwner(t *testing.T) {
-	_, _, err := client.PullRequests.GetComment("%", "r", 1)
+	_, _, err := client.PullRequests.GetComment(context.Background(), "%", "r", 1)
 	testURLParseError(t, err)
 }
 
@@ -120,8 +118,7 @@ func TestPullRequestsService_CreateComment(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	comment, _, err := client.PullRequests.CreateComment("o", "r", 1, input)
-
+	comment, _, err := client.PullRequests.CreateComment(context.Background(), "o", "r", 1, input)
 	if err != nil {
 		t.Errorf("PullRequests.CreateComment returned error: %v", err)
 	}
@@ -133,7 +130,7 @@ func TestPullRequestsService_CreateComment(t *testing.T) {
 }
 
 func TestPullRequestsService_CreateComment_invalidOwner(t *testing.T) {
-	_, _, err := client.PullRequests.CreateComment("%", "r", 1, nil)
+	_, _, err := client.PullRequests.CreateComment(context.Background(), "%", "r", 1, nil)
 	testURLParseError(t, err)
 }
 
@@ -155,8 +152,7 @@ func TestPullRequestsService_EditComment(t *testing.T) {
 		fmt.Fprint(w, `{"id":1}`)
 	})
 
-	comment, _, err := client.PullRequests.EditComment("o", "r", 1, input)
-
+	comment, _, err := client.PullRequests.EditComment(context.Background(), "o", "r", 1, input)
 	if err != nil {
 		t.Errorf("PullRequests.EditComment returned error: %v", err)
 	}
@@ -168,7 +164,7 @@ func TestPullRequestsService_EditComment(t *testing.T) {
 }
 
 func TestPullRequestsService_EditComment_invalidOwner(t *testing.T) {
-	_, _, err := client.PullRequests.EditComment("%", "r", 1, nil)
+	_, _, err := client.PullRequests.EditComment(context.Background(), "%", "r", 1, nil)
 	testURLParseError(t, err)
 }
 
@@ -180,13 +176,13 @@ func TestPullRequestsService_DeleteComment(t *testing.T) {
 		testMethod(t, r, "DELETE")
 	})
 
-	_, err := client.PullRequests.DeleteComment("o", "r", 1)
+	_, err := client.PullRequests.DeleteComment(context.Background(), "o", "r", 1)
 	if err != nil {
 		t.Errorf("PullRequests.DeleteComment returned error: %v", err)
 	}
 }
 
 func TestPullRequestsService_DeleteComment_invalidOwner(t *testing.T) {
-	_, err := client.PullRequests.DeleteComment("%", "r", 1)
+	_, err := client.PullRequests.DeleteComment(context.Background(), "%", "r", 1)
 	testURLParseError(t, err)
 }
