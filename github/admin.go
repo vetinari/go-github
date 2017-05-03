@@ -99,3 +99,47 @@ func (s *AdminService) UpdateTeamLDAPMapping(ctx context.Context, team int, mapp
 
 	return m, resp, nil
 }
+
+// CreateUser creates a new user on Github Enterprise
+//
+// Login and Email are required attributes.
+//
+// https://developer.github.com/enterprise/v3/users/administration/#create-a-new-user
+func (s *AdminService) CreateUser(ctx context.Context, user *User) (*User, *Response, error) {
+	u := "admin/users"
+	req, err := s.client.NewRequest("POST", u, user)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	usr := new(User)
+	resp, err := s.client.Do(ctx, req, usr)
+	if err != nil {
+		return nil, resp, err
+	}
+	return usr, resp, nil
+}
+
+// AdminMessage is returned from a RenameUser call
+type AdminMessage struct {
+	Message *string `json:"message"`
+	URL     *string `json:"url"`
+}
+
+// RenameUser renames a user on Github Enterprise
+//
+// https://developer.github.com/enterprise/v3/users/administration/#rename-an-existing-user
+func (s *AdminService) RenameUser(ctx context.Context, oldLogin, newLogin string) (*AdminMessage, *Response, error) {
+	u := fmt.Sprintf("admin/users/%s", oldLogin)
+	req, err := s.client.NewRequest("PATCH", u, &User{Login: &newLogin})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	msg := new(AdminMessage)
+	resp, err := s.client.Do(ctx, req, msg)
+	if err != nil {
+		return nil, resp, err
+	}
+	return msg, resp, nil
+}
